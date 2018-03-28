@@ -1,9 +1,10 @@
 package com.xyz.common.util;
 
 /**
- * 基于redis setnx的 分布式锁 实, 前提是所有的锁都要有锁定时间. 获取锁的时候,需要指定value,在unlock的时候,会根据value判断是否remove
+ * 基于redis setnx的 分布式锁 实, 前提是所有的锁都要有锁定时间.
+ * 获取锁的时候,需要指定value,在unlock的时候,会根据value判断是否remove
  * 
- * @author: wangxingfei
+ * @author: wxf
  * @createdAt: 2017年7月4日
  */
 public class LockUtil {
@@ -15,7 +16,7 @@ public class LockUtil {
 	 * 获取缓存的value,随机值,使不同的锁value不同 (多服务器可以使用redis时间+客户端标识等)
 	 * 
 	 * @return
-	 * @Author: wangxingfei
+	 * @Author: wxf
 	 * @Date: 2017年9月27日
 	 */
 	public static String getLockValue() {
@@ -30,7 +31,7 @@ public class LockUtil {
 	 * @param key
 	 * @param value
 	 * @return
-	 * @Author: wangxingfei
+	 * @Author: wxf
 	 * @Date: 2017年7月4日
 	 */
 	public static void lock(String key, String value) {
@@ -45,7 +46,7 @@ public class LockUtil {
 	 * @param lockTime
 	 *            获取成功后的锁定时间
 	 * @return
-	 * @Author: wangxingfei
+	 * @Author: wxf
 	 * @Date: 2017年7月4日
 	 */
 	public static void lock(String key, String value, int lockTime) {
@@ -62,7 +63,7 @@ public class LockUtil {
 	 * @param key
 	 * @param value
 	 * @return
-	 * @Author: wangxingfei
+	 * @Author: wxf
 	 * @Date: 2017年7月4日
 	 */
 	public static boolean tryLock(String key, String value) {
@@ -77,7 +78,7 @@ public class LockUtil {
 	 * @param lockTime
 	 *            获取成功后的锁定时间
 	 * @return
-	 * @Author: wangxingfei
+	 * @Author: wxf
 	 * @Date: 2017年7月4日
 	 */
 	public static boolean tryLock(String key, String value, int lockTime) {
@@ -95,7 +96,7 @@ public class LockUtil {
 	 *            获取锁等待超时时间
 	 * 
 	 * @return
-	 * @Author: wangxingfei
+	 * @Author: wxf
 	 * @Date: 2017年7月4日
 	 */
 	public static boolean tryLock(String key, String value, int lockTime, long timeOutMillis) {
@@ -107,7 +108,7 @@ public class LockUtil {
 	 * 
 	 * @param key
 	 * @param value
-	 * @Author: wangxingfei
+	 * @Author: wxf
 	 * @Date: 2017年7月4日
 	 */
 	public static boolean unlock(String key, String value) {
@@ -137,14 +138,14 @@ public class LockUtil {
 	 * @param timeOutMillis
 	 *            尝试超时时间(毫秒)
 	 * @return
-	 * @Author: wangxingfei
+	 * @Author: wxf
 	 * @Date: 2017年7月4日
 	 */
-	private static boolean lock(String key, String value, int lockTime, boolean reTry, int curTryTime, boolean needTimeOut,
-			long timeOutMillis) {
-		System.out.println(Thread.currentThread().getName() + ",lock come in ; key:" + key + ",value:" + value + ",lockTime:"
-				+ lockTime + ",reTry:" + reTry + ",curTryTime:" + curTryTime + ",needTimeOut:" + needTimeOut + ",timeOutMillis:"
-				+ timeOutMillis);
+	private static boolean lock(String key, String value, int lockTime, boolean reTry, int curTryTime,
+			boolean needTimeOut, long timeOutMillis) {
+		System.out.println(Thread.currentThread().getName() + ",lock come in ; key:" + key + ",value:" + value
+				+ ",lockTime:" + lockTime + ",reTry:" + reTry + ",curTryTime:" + curTryTime + ",needTimeOut:"
+				+ needTimeOut + ",timeOutMillis:" + timeOutMillis);
 		curTryTime++;
 		String fullKey = getFullKey(key);
 
@@ -152,22 +153,25 @@ public class LockUtil {
 		boolean success = JedisUtil.setnx(fullKey, value, (long) lockTime * 1000);
 		// 获取成功,直接返回
 		if (success) {
-			System.out.println("lock success ; key:" + key + ",value:" + value + ",lockTime:" + lockTime + ",reTry:" + reTry
-					+ ",curTryTime:" + curTryTime + ",needTimeOut:" + needTimeOut + ",timeOutMillis:" + timeOutMillis);
+			System.out.println("lock success ; key:" + key + ",value:" + value + ",lockTime:" + lockTime + ",reTry:"
+					+ reTry + ",curTryTime:" + curTryTime + ",needTimeOut:" + needTimeOut + ",timeOutMillis:"
+					+ timeOutMillis);
 			return true;
 		}
 
 		// 获取失败,不需要重试,直接返回
 		if (!reTry) {
-			System.out.println("lock failed ; key:" + key + ",value:" + value + ",lockTime:" + lockTime + ",reTry:" + reTry
-					+ ",curTryTime:" + curTryTime + ",needTimeOut:" + needTimeOut + ",timeOutMillis:" + timeOutMillis);
+			System.out.println("lock failed ; key:" + key + ",value:" + value + ",lockTime:" + lockTime + ",reTry:"
+					+ reTry + ",curTryTime:" + curTryTime + ",needTimeOut:" + needTimeOut + ",timeOutMillis:"
+					+ timeOutMillis);
 			return false;
 		}
 
 		// 获取失败, 且已超时,返回
 		if (needTimeOut && timeOutMillis <= 0) {
-			System.out.println("lock failed ; key:" + key + ",value:" + value + ",lockTime:" + lockTime + ",reTry:" + reTry
-					+ ",curTryTime:" + curTryTime + ",needTimeOut:" + needTimeOut + ",timeOutMillis:" + timeOutMillis);
+			System.out.println("lock failed ; key:" + key + ",value:" + value + ",lockTime:" + lockTime + ",reTry:"
+					+ reTry + ",curTryTime:" + curTryTime + ",needTimeOut:" + needTimeOut + ",timeOutMillis:"
+					+ timeOutMillis);
 			return false;
 		}
 
@@ -179,8 +183,9 @@ public class LockUtil {
 
 		// 大于100次,打印warning日志
 		if (curTryTime > 100) {
-			System.out.println("lock warning ; key:" + key + ",value:" + value + ",lockTime:" + lockTime + ",reTry:" + reTry
-					+ ",curTryTime:" + curTryTime + ",needTimeOut:" + needTimeOut + ",timeOutMillis:" + timeOutMillis);
+			System.out.println("lock warning ; key:" + key + ",value:" + value + ",lockTime:" + lockTime + ",reTry:"
+					+ reTry + ",curTryTime:" + curTryTime + ",needTimeOut:" + needTimeOut + ",timeOutMillis:"
+					+ timeOutMillis);
 		}
 
 		return lock(key, value, lockTime, reTry, curTryTime, needTimeOut, timeOutMillis);

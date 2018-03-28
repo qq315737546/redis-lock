@@ -8,6 +8,7 @@ public abstract class NumAdd implements Runnable {
 	}
 
 	public void addNum() {
+		// 稍微停顿,模拟业务
 		sleep();
 		num++;
 	}
